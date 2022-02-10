@@ -1,0 +1,154 @@
+﻿body{
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    font-family: 'Hind Vadodara', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.max{
+    width: 100%;
+    height: 100%;
+}
+
+.editor-frame{    
+    flex-grow: 1;
+    margin: 5px;
+    border: 1px solid black;
+}
+
+.box{
+    width:100px;
+    height:100px;
+    background: red;
+}
+
+.editor-panel{
+    user-select: none;
+    background-color: yellow;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: min-content minmax(auto, 1fr) min-content;
+    grid-template-rows: min-content minmax(auto, 1fr) min-content
+}
+
+.editor-container{
+    background-color: lightblue;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.editor-root{
+    position: absolute;
+    user-select: none;
+    display: grid;
+    overflow: hidden;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.editor-root.horizontal{
+    cursor: ns-resize;
+}
+.editor-root.vertical{
+    cursor: ew-resize;
+}
+
+.core_panel{
+    border-style: solid;
+    border-color: black;
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+    min-width: 20px;
+    min-height: 20px;
+    border-width: 0px;
+}
+
+.core_panel.left{
+    border-width: 0px 1px 0px 0px;    
+}
+.core_panel.right{
+    border-width: 0px 0px 0px 1px;
+}
+
+.core_panel.top{
+    border-width: 0px 0px 1px 0px;
+}
+.core_panel.bottom{
+    border-width: 1px 0px 0px 0px;
+}
+
+.core_panel > .panelspace{
+    overflow: hidden;
+}
+
+.core_panel > .handle{
+    display: none;
+    position: absolute;
+    z-index:1;
+    background-color: transparent;
+    filter: opacity(1);
+    --handle_thickness: 5px;
+    --handle_offset: 3px;
+    --handle_margin_offset: -1px;
+}
+
+.core_panel > .handle.picked{
+    --handle-visible: gray;
+    background-color: var(--handle-visible);
+}
+
+.handle.top{
+    cursor: ns-resize;
+}
+.handle.left,
+.handle.right{
+    cursor: ew-resize;
+}
+
+.handle.left{
+    left: calc(0px - var(--handle_offset));
+    display: flex;
+    width: var(--handle_thickness);
+    height: 100%;
+}
+
+.handle.right{
+    left: calc(100% - var(--handle_offset));
+    display: flex;
+    width: var(--handle_thickness);
+    height: 100%;    
+}
+
+.handle.top{
+    top: calc(0px - var(--handle_offset));
+    display: flex;
+    width: 100%;
+    height: var(--handle_thickness);
+}
+
+.core_panel > .handle.top > .sub-handle {
+    width: 100%;
+    height: calc(var(--handle_thickness) * 2);
+    margin-top: var(--handle_margin_offset);
+}
+.core_panel > .handle.left > .sub-handle,
+.core_panel > .handle.right > .sub-handle{
+    height: 100%;
+    width: calc(var(--handle_thickness) * 2);
+    margin-left: var(--handle_margin_offset);
+}
+
+.core_panel > .handle > .sub-handle{
+    position: absolute;
+    opacity: 50%;
+}
