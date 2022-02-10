@@ -1,7 +1,13 @@
-﻿namespace BlazorFrameworkDemo.Components
+﻿using CompQComponents.Lib.Components;
+
+namespace BlazorFrameworkDemo.Components
 {
-    public class BlankElement
+    public class BlankElement : QComponent<BasicElement>
     {
-        
+
+        public BlankElement()
+        {
+            IsUnique = false;
+        }
     }
 }

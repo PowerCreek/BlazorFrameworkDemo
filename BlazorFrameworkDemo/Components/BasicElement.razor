@@ -1,5 +1,14 @@
-﻿<h3>BasicElement</h3>
+﻿@using CompQComponents.Lib.Components
+
+@inherits Surrogate
+
+@GetContent
 
 @code {
-    
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender) StateHasChanged();
+        return base.OnAfterRenderAsync(firstRender);
+    }
 }

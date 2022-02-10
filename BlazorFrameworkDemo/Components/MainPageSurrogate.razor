@@ -1,5 +1,23 @@
-﻿<h3>MainPageSurrogate</h3>
+﻿@using CompQComponents.Lib.Components
+@using CompQComponents.Lib.Attributes
+@inherits BasicElement
+
+@GetContent
 
 @code {
-    
+
+    public QComponent RootComponent { get; set; }
+   
+    public MainPageSurrogate()
+    {
+        RootComponent = new RootComponent();
+
+        RootComponent.Attributes = new AttributeBuilder()
+            .Set<CssAttribute>(attribute => attribute.WithClass("box-panel"))
+            .Values;
+        
+        QComponent = RootComponent;
+    }
+
+
 }
