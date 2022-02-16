@@ -215,15 +215,35 @@ namespace BlazorFrameworkDemo.Components
         
         public async Task OnScrollMethod<T>(T args)
         {
-
+            double absDelta = 0;
             lock (average_lock)
             {
-                DirectionQueue.Enqueue(GetDeltaY(args));
+                double delta = GetDeltaY(args);
+                
+                if (args is WheelEventArgs)
+                {
+                    DirectionQueue.Enqueue(delta);
+                }
+
+                if (args is PointerEventArgs)
+                {
+                    absDelta = Math.Abs(delta);
+                    double val = 0;
+                    for (int i = 0; i < 20; i++)
+                    {
+                        val = (delta / (i*0.2+2));
+                        delta -= val;
+                        DirectionQueue.Enqueue(val);
+                    }
+                    DirectionQueue.Enqueue(delta);
+                }
             }
+
             while (DirectionQueue.TryDequeue(out double item))
             {
-                await PerformSlide(item);
-            }
+                    await PerformSlide(item);
+                    await Task.Delay(10);
+            } 
         }
 
         protected override IEnumerable<QComponent> Children {

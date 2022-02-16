@@ -49,7 +49,7 @@ namespace BlazorFrameworkDemo.Components
                             return;
                         }
                         if (!Slider.AverageTouchY.HasValue) return;
-                        await Slider.OnScrollMethod((args as PointerEventArgs)!);
+                        Slider.OnScrollMethod((args as PointerEventArgs)!);
                     }),
                     EventItems.OnPointerUp.AddEventListener(args =>
                     {
