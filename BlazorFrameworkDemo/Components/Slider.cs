@@ -92,7 +92,8 @@ namespace BlazorFrameworkDemo.Components
             bool rolledOver = dirY switch
             {
                 {} val when val < 0 => ScrollTrack%SlotSize < RolloverCheck,
-                {} val when val > 0 => ScrollTrack%SlotSize > RolloverCheck
+                {} val when val > 0 => ScrollTrack%SlotSize > RolloverCheck,
+                _ => false
             };
             
             RolloverCheck = ScrollTrack%SlotSize;
@@ -116,45 +117,38 @@ namespace BlazorFrameworkDemo.Components
 
                 var a = Items.First();
                 var b = Items.Last();
-                
-                switch (dirY)
+
+                if (dirY is < 0)
                 {
-                    case < 0:
+                    if (itemsPast is > 4)
                     {
-                        switch (itemsPast)
-                        {
-                            case > 4:
-                                Items.Remove(b);
-                                ItemForwardHistory.Push(b);
-                                //Console.WriteLine("take");
-                                position = ScrollTrack -= SlotSize;
-                                break;
-                            case 4:
-                                //Console.WriteLine("takeA");
-                                position = ScrollTrack -= SlotSize;
-                                break;
-                        }
-
-                        if (ItemBackHistory.TryPop(out var prevItem))
-                        {
-                            Items.Insert(0, prevItem);
-                        }
-
-                        break;
+                        Items.Remove(b);
+                        ItemForwardHistory.Push(b);
+                        //Console.WriteLine("take");
+                        position = ScrollTrack -= SlotSize;
                     }
-                    case > 0:
-                        switch (itemsPast)
-                        {
-                            case > 4:
-                                ItemBackHistory.Push(a);
-                                Items.Remove(a);
-                                //Console.WriteLine("give");
-                                position = ScrollTrack += SlotSize;
-                                break;
-                        }
+                    else if (itemsPast == 4)
+                    {
+                        //Console.WriteLine("takeA");
+                        position = ScrollTrack -= SlotSize;
+                    }
 
-                        Items.Add(ItemForwardHistory.TryPop(out var itemForward) ? itemForward : item);
-                        break;
+                    if (ItemBackHistory.TryPop(out var prevItem))
+                    {
+                        Items.Insert(0, prevItem);
+                    }
+                }
+                else if (dirY is > 0)
+                {
+                    if (itemsPast is > 4)
+                    {
+                        ItemBackHistory.Push(a);
+                        Items.Remove(a);
+                        //Console.WriteLine("give");
+                        position = ScrollTrack += SlotSize;
+                    }
+
+                    Items.Add(ItemForwardHistory.TryPop(out var itemForward) ? itemForward : item);
                 }
 
                 TriggerRender();
@@ -221,16 +215,10 @@ namespace BlazorFrameworkDemo.Components
         
         public async Task OnScrollMethod<T>(T args)
         {
-            double count = GetDeltaY(args);
 
             lock (average_lock)
             {
-                if (ScrollTrack >= 0 && count < 0) return;
-                int sign = Math.Sign(count);
-                for (int i = 0; i < Math.Abs(count); i++)
-                {
-                    DirectionQueue.Enqueue(sign);
-                }
+                DirectionQueue.Enqueue(GetDeltaY(args));
             }
             while (DirectionQueue.TryDequeue(out double item))
             {
