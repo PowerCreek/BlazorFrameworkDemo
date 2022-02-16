@@ -15,7 +15,7 @@ namespace BlazorFrameworkDemo.Components
     {
         public List<QComponent> Items;
 
-        public int SlotSize = 400;
+        public int SlotSize = 500;
             
         public int SlotCount = 5;
         
@@ -44,7 +44,10 @@ namespace BlazorFrameworkDemo.Components
                     {
                         IsUnique = true, Content = $"{e} simple",
                         EventContainer = new HashSet<EventCallbackItem>().SetEvent(
-                            OnMouseDown.AddEventListener(args => { Console.WriteLine($"im clicking babyyyyyyy! {e}"); })
+                            OnMouseDown.AddEventListener(args =>
+                            {
+                                Console.WriteLine($"im clicking babyyyyyyy! {e}");
+                            })
                         ),
                     } as QComponent;
 
@@ -67,7 +70,7 @@ namespace BlazorFrameworkDemo.Components
         {
             if (itemsPast <= 0 && ScrollTrack >= 0 && dirY <= 0)
             {
-                Console.WriteLine($"past: {itemsPast} {ScrollTrack}");
+                // Console.WriteLine($"past: {itemsPast} {ScrollTrack}");
                 ScrollTrack = 0;
                 ScrollAttributeData.WithStyle(
                     ("top", $"0px"),
@@ -172,30 +175,66 @@ namespace BlazorFrameworkDemo.Components
         }
 
         public object LOCK_OBJECT = new object();
-        
-        public const int intervals = 10;
+
+        public const int Intervals = 10;
+        public const double TouchDelta = 1;
         public ConcurrentQueue<double> DirectionQueue = new();
-        
-        public async Task OnScrollMethod(WheelEventArgs args)
+
+        public double GetDeltaY<T>(T obj)
         {
-            lock (LOCK_OBJECT)
+            return obj switch
             {
-                for (int i = 0; i < intervals; i++)
+                {} a when a is PointerEventArgs pointer => GetPointerDeltaY(pointer)*TouchDelta,
+                {} a when a is WheelEventArgs mouse => mouse.DeltaY,
+            };
+        }
+
+        public double? AverageTouchY = null;
+        public object average_lock = new object();
+        
+        public double GetPointerDeltaY(PointerEventArgs args)
+        {
+            lock (average_lock)
+            {
+                var last = AverageTouchY.Value;
+                AverageTouchY = args.ScreenY;
+                var val = last - AverageTouchY.Value;
+                return val;
+            }
+        }
+
+        public void StartPointer(PointerEventArgs args)
+        {
+            lock (average_lock)
+            {
+                AverageTouchY = args.ScreenY;
+            }
+        }
+        
+        public void ResetAverageDelta()
+        {
+            lock (average_lock)
+            {
+                AverageTouchY = null;
+            }
+        }
+        
+        public async Task OnScrollMethod<T>(T args)
+        {
+            double count = GetDeltaY(args);
+
+            lock (average_lock)
+            {
+                if (ScrollTrack >= 0 && count < 0) return;
+                int sign = Math.Sign(count);
+                for (int i = 0; i < Math.Abs(count); i++)
                 {
-                    DirectionQueue.Enqueue(args.DeltaY/intervals);
+                    DirectionQueue.Enqueue(sign);
                 }
             }
-
-            for (int i = 0; i < intervals; i++)
+            while (DirectionQueue.TryDequeue(out double item))
             {
-                lock (LOCK_OBJECT)
-                {
-                    if(DirectionQueue.TryDequeue(out double item))
-                    {
-                        PerformSlide(item);
-                    }
-                }
-                await Task.Delay(100 / intervals);
+                await PerformSlide(item);
             }
         }
 

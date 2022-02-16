@@ -27,10 +27,40 @@ namespace BlazorFrameworkDemo.Components
 
             Slider.TriggerParentRender = () => TriggerRender();
             
-            DoScrollAction = args => Slider.OnScrollMethod((args as WheelEventArgs)!);
-            
+            DoScrollAction = async args => Slider.OnScrollMethod((args as WheelEventArgs)!);
+           
             EventContainer = new HashSet<EventCallbackItem>()
-                .SetEvent(EventItems.OnWheel.AddEventListener(DoScrollAction));
+                .SetEvent(
+                    EventItems.OnTouchMove.AddEventListener(args =>
+                    {
+                    }),
+                    
+                    EventItems.OnPointerDown.AddEventListener(args =>
+                    {
+                        if(args is PointerEventArgs buttons && (buttons.Buttons & 1) == 0) return;
+                        Slider.StartPointer((args as PointerEventArgs)!);
+                    }),
+                    
+                    EventItems.OnPointerMove.AddEventListener(async args =>
+                    {
+                        if (args is PointerEventArgs buttons && (buttons.Buttons & 1) == 0)
+                        {
+                            Slider.ResetAverageDelta();
+                            return;
+                        }
+                        if (!Slider.AverageTouchY.HasValue) return;
+                        await Slider.OnScrollMethod((args as PointerEventArgs)!);
+                    }),
+                    EventItems.OnPointerUp.AddEventListener(args =>
+                    {
+                        Slider.ResetAverageDelta();
+                    }),
+                    
+                    EventItems.OnWheel.AddEventListener(args =>
+                    {
+                        Slider.OnScrollMethod((args as WheelEventArgs)!);
+                    })
+                );
         }
         
         public Action<EventArgs> DoScrollAction;

@@ -23,7 +23,7 @@
     top: 0px;
     
     display: grid;
-    grid-template-columns: min-content 1fr min-content;
+    grid-template-columns: 1fr min-content 1fr;
 }
 
 .root-container > * {
@@ -31,26 +31,28 @@
 }
 
 .left-panel{
-    width: 300px;
     grid-column: 1;
     background-color: light-gray;
     border: 2px solid black;
 }
 
 .middle-panel{
+    width: 500px;
     position: relative;
     overflow: hidden;
     grid-column: 2;
 }
 
 .middle-panel > .slider{
+    touch-action: none;
+    overflow-y: scroll;    
     position: absolute;
     top: 0px;
     height: fit-content;
     display: grid;
-    width: 100%;
+    width: calc(100% + 17px);
     --slider_slot_display: unset;
-    --slider_slot_height: 400px;
+    --slider_slot_height: 500px;
 }
 
 .middle-panel > .slider > *{
@@ -62,7 +64,6 @@
 }
 
 .right-panel{
-    width: 300px;
     grid-column: 3;
     background-color: light-gray;
     border: 2px solid black;
