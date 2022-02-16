@@ -6,6 +6,9 @@
 
 @code {
 
+    [Inject]
+    public IJSRuntime JsRuntime { get; set; }
+    
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if(firstRender) StateHasChanged();

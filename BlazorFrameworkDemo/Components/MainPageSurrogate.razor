@@ -11,11 +11,6 @@
     public MainPageSurrogate()
     {
         RootComponent = new RootComponent();
-
-        RootComponent.Attributes = new AttributeBuilder()
-            .Set<CssAttribute>(attribute => attribute.WithClass("box-panel"))
-            .Values;
-        
         QComponent = RootComponent;
     }
 
