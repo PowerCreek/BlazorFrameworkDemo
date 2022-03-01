@@ -14,4 +14,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\QComponentLibrary\CompQComponents.csproj" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="publish" />
+    </ItemGroup>
 </Project>

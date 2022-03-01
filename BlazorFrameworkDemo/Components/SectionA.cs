@@ -5,6 +5,7 @@ using BlazorFrameworkDemo.Interop;
 using CompQComponents.Lib.Attributes;
 using CompQComponents.Lib.Components;
 using Microsoft.AspNetCore.Components.Web;
+using static CompQComponents.Lib.Components.EventItems;
 
 namespace BlazorFrameworkDemo.Components
 {
@@ -31,17 +32,17 @@ namespace BlazorFrameworkDemo.Components
            
             EventContainer = new HashSet<EventCallbackItem>()
                 .SetEvent(
-                    EventItems.OnTouchMove.AddEventListener(args =>
+                    OnTouchMove.AddEventListener(args =>
                     {
                     }),
                     
-                    EventItems.OnPointerDown.AddEventListener(args =>
+                    OnPointerDown.AddEventListener(args =>
                     {
                         if(args is PointerEventArgs buttons && (buttons.Buttons & 1) == 0) return;
                         Slider.StartPointer((args as PointerEventArgs)!);
                     }),
                     
-                    EventItems.OnPointerMove.AddEventListener(async args =>
+                    OnPointerMove.AddEventListener(async args =>
                     {
                         if (args is PointerEventArgs buttons && (buttons.Buttons & 1) == 0)
                         {
@@ -51,12 +52,14 @@ namespace BlazorFrameworkDemo.Components
                         if (!Slider.AverageTouchY.HasValue) return;
                         Slider.OnScrollMethod((args as PointerEventArgs)!);
                     }),
-                    EventItems.OnPointerUp.AddEventListener(args =>
+                    OnPointerUp.AddEventListener(async args =>
                     {
+                        if (!Slider.AverageTouchY.HasValue) return;
+                        await Slider.OnScrollMethod((args as PointerEventArgs)!, true);
                         Slider.ResetAverageDelta();
                     }),
                     
-                    EventItems.OnWheel.AddEventListener(args =>
+                    OnWheel.AddEventListener(args =>
                     {
                         Slider.OnScrollMethod((args as WheelEventArgs)!);
                     })

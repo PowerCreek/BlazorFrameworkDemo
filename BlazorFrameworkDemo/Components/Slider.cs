@@ -14,19 +14,12 @@ namespace BlazorFrameworkDemo.Components
     public class Slider : QComponent<BasicElement>
     {
         public List<QComponent> Items;
-
         public int SlotSize = 500;
-            
         public int SlotCount = 5;
-        
         public int? ScrollTrack = 0;
-        
         public float Magnitude = 1;
-        
         public int? RolloverCheck = 0;
-        
         public int itemsPast = 0;
-        
         public StyleAttribute ScrollAttributeData;
 
         public Action TriggerParentRender = () => { };
@@ -201,6 +194,7 @@ namespace BlazorFrameworkDemo.Components
         {
             lock (average_lock)
             {
+                DirectionQueue.Clear();
                 AverageTouchY = args.ScreenY;
             }
         }
@@ -209,41 +203,65 @@ namespace BlazorFrameworkDemo.Components
         {
             lock (average_lock)
             {
+                DirectionQueue.Clear();
                 AverageTouchY = null;
             }
         }
-        
-        public async Task OnScrollMethod<T>(T args)
+
+        public async Task OnScrollMethod<T>(T args, bool doThing = false)
         {
             double absDelta = 0;
+            double delta = 0;
             lock (average_lock)
             {
-                double delta = GetDeltaY(args);
+                delta = GetDeltaY(args);
                 
                 if (args is WheelEventArgs)
                 {
                     DirectionQueue.Enqueue(delta);
                 }
 
-                if (args is PointerEventArgs)
+                if (!doThing && args is PointerEventArgs)
                 {
-                    absDelta = Math.Abs(delta);
-                    double val = 0;
-                    for (int i = 0; i < 20; i++)
-                    {
-                        val = (delta / (i*0.2+2));
-                        delta -= val;
-                        DirectionQueue.Enqueue(val);
-                    }
                     DirectionQueue.Enqueue(delta);
                 }
             }
 
-            while (DirectionQueue.TryDequeue(out double item))
+            while ((args is WheelEventArgs || DirectionQueue.Count > 1) && DirectionQueue.TryDequeue(out double item))
             {
-                    await PerformSlide(item);
-                    await Task.Delay(10);
-            } 
+                await PerformSlide(item);
+                await Task.Delay(10);
+            }
+
+            if (doThing && DirectionQueue.Count == 1 && DirectionQueue.TryDequeue(out double item2))
+            {
+                delta = item2 * 3;
+                double val = 0;
+                if (Math.Abs(item2) <= 3)
+                {                
+                    //await PerformSlide(delta);
+                    return;
+                }
+
+                lock (DirectionQueue)
+                {
+                    for (int i = 0; i < 40; i++)
+                    {
+                        val = Math.Clamp(delta / ((i * 1.1) + 2), -SlotCount * 0.9, SlotSize * 0.9);
+                        delta -= val;
+                        DirectionQueue.Enqueue(delta);
+                    }
+
+                }
+
+                while (!DirectionQueue.IsEmpty && DirectionQueue.TryDequeue(out var item3))
+                {
+                    await PerformSlide(item3);
+                    await Task.Delay(5);
+                }
+
+                await PerformSlide(delta);
+            }
         }
 
         protected override IEnumerable<QComponent> Children {
